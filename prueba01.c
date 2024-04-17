@@ -37,30 +37,21 @@ void inicializar_gpio(){
     }
 }
 
-void ejecutar_parpadeo(int matriz[n][n]){
-    int duracion = 0;
-    printf("Ingrese la duración del parpadeo en segundos: ");
-    scanf("%d", &duracion);
-
+void parpadear_leds(int matriz[n][n], int duracion){
     time_t tiempo_inicio, tiempo_actual;
     time(&tiempo_inicio);
 
     while (difftime(time(&tiempo_actual), tiempo_inicio) < duracion && !signal_received){
-        parpadear_leds(matriz);
-    }
-}
-
-
-void parpadear_leds(int matriz[n][n]) {
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < n; j++) {
-            if(matriz[i][j] == 1){
-                gpioWrite(positivos[i], PI_HIGH);
-                gpioWrite(negativos[j], PI_LOW);
-                gpioDelay(500000);
-                gpioWrite(positivos[i], PI_LOW);
-                gpioWrite(negativos[j], PI_HIGH);
-                gpioDelay(500000);
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < n; j++) {
+                if(matriz[i][j] == 1){
+                    gpioWrite(positivos[i], PI_HIGH);
+                    gpioWrite(negativos[j], PI_LOW);
+                    gpioDelay(500000);
+                    gpioWrite(positivos[i], PI_LOW);
+                    gpioWrite(negativos[j], PI_HIGH);
+                    gpioDelay(500000);
+                }
             }
         }
     }
@@ -74,17 +65,18 @@ void limpiar_gpio() {
     gpioTerminate();
 }
 
-
-
 int main(){
-    int matriz[n][n];
+    int matriz[n][n], duracion=0;
+    prinntf("Ingrese segundos:\n");
+    scanf("%d", &duracion);
+
     signal(SIGINT, sigint_handler);
     printf("Press CTRL-C to exit.\n");
 
     cargar_matriz(matriz);
     inicializar_gpio(matriz); 
 
-    ejecutar_parpadeo();
+    parpadear_leds(matriz, duracion);
     limpiar_gpio();
     
     printf("\n");
